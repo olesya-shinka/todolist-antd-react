@@ -1,12 +1,7 @@
-import "./App.css";
-import TaskList from "./components/taskList";
+import AddTaskForm from "./components/addTaskForm";
 
 function App() {
-  return (
-    <div className="App">
-      <TaskList />
-    </div>
-  );
+  return <AddTaskForm />;
 }
 
 export default App;

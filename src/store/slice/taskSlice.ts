@@ -1,18 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-export interface Task {
-    id: string;
-    title: string;
-    description: string;
-    children: Task[];
-}
-
-interface TasksState {
-    tasks: Task[];
-}
+import { Task, TasksState } from '../../components/service';
 
 const initialState: TasksState = {
-    tasks: [{ id: '1', title: 'Sample Task', description: 'This is a sample task', children: [] }]
+    tasks: [],
 };
 
 const tasksSlice = createSlice({
@@ -21,19 +11,29 @@ const tasksSlice = createSlice({
     reducers: {
         addTask: (state, action: PayloadAction<Task>) => {
             state.tasks.push(action.payload);
+            localStorage.setItem('tasks', JSON.stringify(state.tasks));
         },
         editTask: (state, action: PayloadAction<{ taskId: string; updatedTask: Partial<Task> }>) => {
             const { taskId, updatedTask } = action.payload;
-            const existingTask = state.tasks.find(task => task.id === taskId);
+            const existingTask = state.tasks.find(task => task.key === taskId);
             if (existingTask) {
                 Object.assign(existingTask, updatedTask);
+                localStorage.setItem('tasks', JSON.stringify(state.tasks));
             }
         },
         deleteTask: (state, action: PayloadAction<string>) => {
-            state.tasks = state.tasks.filter(task => task.id !== action.payload);
-        }
+            const updatedTasks = state.tasks.filter(task => task.key !== action.payload);
+            state.tasks = updatedTasks;
+            localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+        },
+        loadTasks: (state) => {
+            const tasks = localStorage.getItem('tasks');
+            if (tasks) {
+                state.tasks = JSON.parse(tasks);
+            }
+        },
     }
 });
 
-export const { addTask, editTask, deleteTask } = tasksSlice.actions;
+export const { addTask, editTask, deleteTask, loadTasks } = tasksSlice.actions;
 export default tasksSlice.reducer;
