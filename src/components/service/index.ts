@@ -40,3 +40,12 @@ export interface Task {
 export interface TasksState {
     tasks: Task[];
 }
+
+export interface ActionsColumnProps {
+    task: Task;
+    handleEditTask: (task: Task) => void;
+    handleDelete: (task: Task) => void;
+    saveEdit: (key: string) => void;
+    cancelEdit: () => void;
+    isEditing: (task: Task) => boolean;
+  }

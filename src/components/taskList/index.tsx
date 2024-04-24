@@ -3,26 +3,13 @@ import { TablePaginationConfig } from "antd/es/table/interface";
 import { TableCurrentDataSource } from "antd/lib/table/interface";
 import { SorterResult } from "antd/lib/table/interface";
 import { FilterValue } from "antd/lib/table/interface";
-import {
-  Row,
-  Table,
-  Tag,
-  Popconfirm,
-  Button,
-  Tooltip,
-  Space,
-  Form,
-  Input,
-  Select,
-} from "antd";
+import { Row, Table, Tag, Button, Space, Form, Input, Select } from "antd";
 import type { ColumnsType, ColumnType } from "antd/es/table/interface";
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   FolderOpenOutlined,
   SyncOutlined,
-  EditOutlined,
-  DeleteOutlined,
 } from "@ant-design/icons";
 import { deleteTask, editTask, loadTasks } from "../../store/slice/taskSlice";
 import { useDispatch } from "react-redux";
@@ -34,6 +21,7 @@ import {
 } from "../service";
 import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
+import ActionsColumn from "../ActionsColumns";
 
 const { Option } = Select;
 const { Search } = Input;
@@ -49,22 +37,19 @@ const TaskList: React.FC<TaskListProps> = ({ data, setData }) => {
     order?: "descend" | "ascend" | undefined;
     sortOrder?: "descend" | "ascend" | undefined;
   }>({});
-  const [searchText, setSearchText] = useState("");
   const [chooseData, setChooseData] = useState(true);
-
-  useEffect(() => {
-    dispatch(loadTasks());
-  }, [dispatch]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     setSearchInfo(data);
-  }, [data]);
+    dispatch(loadTasks());
+  }, [dispatch, data]);
 
   useEffect(() => {
-    if (searchText === "") {
+    if (searchTerm === "") {
       setChooseData(true);
     }
-  }, [searchText]);
+  }, [searchTerm]);
 
   const columns: CustomColumnType<Task>[] = [
     // номер
@@ -198,54 +183,18 @@ const TaskList: React.FC<TaskListProps> = ({ data, setData }) => {
     // редактирование и удаление
     {
       title: "Action",
-      dataIndex: "action",
       key: "action",
-      render: (task: Task) => {
-        const editable = isEditing(task);
-        return tasks.length >= 1 ? (
-          <Space>
-            {editable ? (
-              <span>
-                <Space wrap align="center">
-                  <Button
-                    size="middle"
-                    type="primary"
-                    onClick={() => saveEdit(task.key)}
-                  >
-                    Save
-                  </Button>
-                  <Popconfirm
-                    title="Are you sure want to cancel?"
-                    onConfirm={cancelEdit}
-                  >
-                    <Button size="middle">Cancel</Button>
-                  </Popconfirm>
-                </Space>
-              </span>
-            ) : (
-              <Tooltip title="Edit">
-                <Button
-                  type="primary"
-                  onClick={() => handleEditTask(task)}
-                  icon={<EditOutlined />}
-                ></Button>
-              </Tooltip>
-            )}
-            <Popconfirm
-              title="Are you sure want to delete?"
-              onConfirm={() => handleDelete(task)}
-            >
-              <Tooltip title="Delete">
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  disabled={editable}
-                ></Button>
-              </Tooltip>
-            </Popconfirm>
-          </Space>
-        ) : null;
-      },
+      dataIndex: "action",
+      render: (_, task: Task) => (
+        <ActionsColumn
+          task={task}
+          handleEditTask={handleEditTask}
+          handleDelete={handleDelete}
+          saveEdit={saveEdit}
+          cancelEdit={cancelEdit}
+          isEditing={isEditing}
+        />
+      ),
     },
   ];
 
@@ -268,7 +217,7 @@ const TaskList: React.FC<TaskListProps> = ({ data, setData }) => {
 
   const handleEditTask = (task: Task) => {
     console.log("Editing task:", task);
-    if (task) {
+    if (task && task.key) {
       const { title, description, dueDate, tags, status } = task;
       form.setFieldsValue({
         ...{ title, description, dueDate, tags, status },
@@ -390,26 +339,26 @@ const TaskList: React.FC<TaskListProps> = ({ data, setData }) => {
   //поиск
   const reset = () => {
     setChooseData(true);
-    setSearchText("");
+    setSearchTerm("");
     loadData();
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
+    setSearchTerm(e.target.value);
     if (e.target.value === "") {
       setChooseData(true);
     }
   };
 
-  const onSearch = (value: string) => {
-    let filteredData = searchInfo.filter(
-      (text) =>
-        text.title.toLowerCase().includes(value.toLowerCase()) ||
-        text.description.toLowerCase().includes(value.toLowerCase()) ||
-        text.dueDate.toString().includes(value.toLowerCase()) ||
-        text.timestamp.toString().includes(value.toLowerCase())
+  const onSearch = (term: string) => {
+    setSearchTerm(term);
+    let filteredData = tasks.filter((text) =>
+      Object.values(text).some(
+        (value) =>
+          typeof value === "string" &&
+          value.toLowerCase().includes(term.toLowerCase())
+      )
     );
-
     setSearchInfo(filteredData);
     setChooseData(false);
   };
@@ -420,9 +369,9 @@ const TaskList: React.FC<TaskListProps> = ({ data, setData }) => {
         <Space align="center">
           <Search
             allowClear
-            placeholder="Search"
+            placeholder="search by title"
             onChange={handleSearch}
-            value={searchText}
+            value={searchTerm}
             enterButton
             onSearch={onSearch}
             style={{
