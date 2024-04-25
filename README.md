@@ -16,3 +16,4 @@
 Для запуска проект скачайте архив или склонируйте репозиторий https://github.com/olesya-shinka/tt-zit.git
 Установите завистимости npm i, запустите проект npm start
 
+деплой https://main--friendly-eclair-0e30aa.netlify.app/
