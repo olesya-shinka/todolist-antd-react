@@ -51,6 +51,8 @@
     ]
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.8"
+    "@types/estree": "^1.0.5",
+    "@types/uuid": "^9.0.8",
+    "dayjs": "^1.11.10"
   }
 }

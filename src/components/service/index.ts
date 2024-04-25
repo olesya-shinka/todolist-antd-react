@@ -21,7 +21,7 @@ export interface EditableCellProps {
     dataIndex: string;
     title: string;
     inputType: string;
-    task: Task[];
+    task: Task;
     index: number;
     children: React.ReactNode;
     [key: string]: any;
@@ -48,4 +48,4 @@ export interface ActionsColumnProps {
     saveEdit: (key: string) => void;
     cancelEdit: () => void;
     isEditing: (task: Task) => boolean;
-  }
+}

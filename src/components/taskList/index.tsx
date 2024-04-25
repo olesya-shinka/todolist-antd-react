@@ -116,24 +116,19 @@ const TaskList: React.FC<TaskListProps> = ({ data, setData }) => {
       editable: true,
       filters: [
         { text: "Crucial", value: "Crucial" },
-        { text: "High Prority", value: "High Priority" },
-        { text: "Low Prority", value: "Low Priority" },
+        { text: "High Priority", value: "High Priority" },
+        { text: "Low Priority", value: "Low Priority" },
         { text: "Usual", value: "Usual" },
       ],
-      onFilter: (value: string, task: Task) => task.tags.indexOf(value) === 0,
-      render: ({ tags }: { tags: string[] }) => (
+      onFilter: (value: string, task: Task) => task.tags.includes(value),
+      render: (tags: string[]) => (
         <>
           {tags &&
             tags.map((tag: string) => {
               let color = tag.length > 4 ? "blue" : "purple";
               return (
-                <Space wrap direction="horizontal" align="center">
-                  <Tag
-                    color={color}
-                    style={{ margin: "2px" }}
-                    bordered={false}
-                    key={tag}
-                  >
+                <Space wrap direction="horizontal" align="center" key={tag}>
+                  <Tag color={color} style={{ margin: "2px" }} bordered={false}>
                     {tag.toUpperCase()}
                   </Tag>
                 </Space>
@@ -216,7 +211,6 @@ const TaskList: React.FC<TaskListProps> = ({ data, setData }) => {
   };
 
   const handleEditTask = (task: Task) => {
-    console.log("Editing task:", task);
     if (task && task.key) {
       const { title, description, dueDate, tags, status } = task;
       form.setFieldsValue({
@@ -306,6 +300,7 @@ const TaskList: React.FC<TaskListProps> = ({ data, setData }) => {
         dataIndex: col.dataIndex,
         title: col.title,
         editing: isEditing(task),
+        tags: task.tags,
       }),
     } as ColumnType<Task>;
   });
